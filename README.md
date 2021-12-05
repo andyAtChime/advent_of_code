@@ -15,7 +15,8 @@
 
 1. I know it's not very good
 2. `run_a` and `run_b` should return your solutions for part 1 and part 2 for each day, respectively
-3. No, I know, gems are for fools. Why would I make this a gem? Why would I INSTALL any gems? `#JOYOFCODING`
+3. You can use `input_blob`, `input_lines`, or `parsed_input` in the classes that inherit from `AdventOfCode::Day`
+4. No, I know, gems are for fools. Why would I make this a gem? Why would I INSTALL any gems? `#JOYOFCODING`
 
 ## Contributing
 1. If you really want to, you can ask
