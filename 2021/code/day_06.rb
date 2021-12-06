@@ -9,25 +9,15 @@ module AdventOfCode
       @counts = {}
 
       class << self
-        def get_offspring_count(count, days)
-          return @counts[[count, days]] if @counts[[count, days]]
-
-          a = count
-          total = 1
-          days.times do |i|
-            a -= 1
-            if a < 0
-              a %= 7
-              total += get_offspring_count(8, days - i - 1)
-            end
-          end
-
-          @counts[[count, days]] = total
-        end
-
         def fish_after_days(days)
           numbers = parsed_input[0]
-          numbers.map { |n| get_offspring_count(n, days) }.sum
+          fish_days = [0] * 9
+          numbers.each { |n| fish_days[n] += 1 }
+          days.times do
+            fish_days << fish_days.shift
+            fish_days[6] += fish_days[8]
+          end
+          fish_days.sum
         end
 
         def run_a
