@@ -10,12 +10,10 @@ module AdventOfCode
 
       class << self
         def fish_after_days(days)
-          numbers = parsed_input[0]
           fish_days = [0] * 9
-          numbers.each { |n| fish_days[n] += 1 }
-          days.times do
-            fish_days << fish_days.shift
-            fish_days[6] += fish_days[8]
+          parsed_input.flatten.each { |n| fish_days[n] += 1 }
+          days.times do |i|
+            fish_days[(i + 7) % 9] += fish_days[i % 9]
           end
           fish_days.sum
         end
