@@ -14,7 +14,6 @@ class BaseTest < Test::Unit::TestCase
 
   def mock_day
     d = day_class(day_number, year_number)
-    puts d
     d.input_lines = @input_lines
     d.input_blob = @input_blob
     d
