@@ -8,7 +8,7 @@ module AdventOfCode
       INPUT_PARSER = lambda { |line| line }
 
       class << self
-        def get_invalid_character(line)
+        def evaluate_line(line)
           stack = []
           closers = { "}" => "{", "]" => "[", ")" => "(", ">" => "<" }
           line.split("").each do |char|
@@ -17,39 +17,17 @@ module AdventOfCode
             elsif closers[char] == stack[-1]
               stack.pop
             else
-              return char
+              return [stack, char]
             end
           end
-          return nil
+          return [stack.map { |s| closers.invert[s] }.reverse.join(""), nil]
         end
 
-        def finish_stack(line)
-          stack = []
-          closers = { "}" => "{", "]" => "[", ")" => "(", ">" => "<" }
-          openers = closers.invert
-          line.split("").each do |char|
-            if closers.values.include?(char)
-              stack << char
-            elsif closers[char] == stack[-1]
-              stack.pop
-            end
-          end
-          output = stack.map { |s| openers[s] }.reverse.join("")
-        end
-
-        def get_score(char)
+        def get_error_score(char)
           { "}" => 1197, "]" => 57, ")" => 3, ">" => 25137 }[char]
         end
 
-        def run_a
-          parsed_input
-            .map { |l| get_invalid_character(l) }
-            .compact
-            .map { |l| get_score(l) }
-            .sum
-        end
-
-        def get_score_b(line)
+        def get_stack_score(line)
           scores = { "}" => 3, "]" => 2, ")" => 1, ">" => 4 }
           s = 0
           line.split("").each do |i|
@@ -59,11 +37,19 @@ module AdventOfCode
           s
         end
 
+        def run_a
+          parsed_input
+            .map { |l| evaluate_line(l)[1] }
+            .compact
+            .map { |l| get_error_score(l) }
+            .sum
+        end
+
         def run_b
           b = parsed_input
-            .select { |l| get_invalid_character(l).nil? }
-            .map { |l| finish_stack(l)}
-            .map { |l| get_score_b(l)}
+            .map { |l| evaluate_line(l) }
+            .select { |l| l[1].nil? }
+            .map { |l| get_stack_score(l[0]) }
             .sort
           b[b.size / 2]
         end
