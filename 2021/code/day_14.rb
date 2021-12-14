@@ -18,22 +18,23 @@ module AdventOfCode
 
         def initialize(state, instructions)
           @pair_counts = {}
-          set_pair_counts(state, instructions)
+          @element_counts = {}
+          set_counts(state, instructions)
           @instructions = Hash[instructions.map do |i|
             [i[0] + i[1], i[2]]
           end]
         end
 
-        def set_pair_counts(state, instructions)
-          corpus = (instructions + ["$"]).flatten
+        def set_counts(state, instructions)
+          corpus = instructions.flatten
           corpus.repeated_permutation(2).each do |pair|
             @pair_counts[pair.join] = 0
           end
+          corpus.each { |c| @element_counts[c] = 0 }
 
-          padded_state = "#{state}$"
-          (padded_state.length - 1).times do |i|
-            a = padded_state[i..(i + 1)]
-            @pair_counts[a] += 1
+          state.length.times do |i|
+            @pair_counts[state[i..(i + 1)]] += 1 if i < state.length - 1
+            @element_counts[state[i]] += 1
           end
         end
 
@@ -51,25 +52,14 @@ module AdventOfCode
               @pair_counts[k] -= v
               @pair_counts[k[0] + inserted] += v
               @pair_counts[inserted + k[1]] += v
+              @element_counts[inserted] += v
             end
           end
         end
 
-        def size
-          return @pair_counts.values.sum
-        end
-
-        def count_by_element
-          Hash[@pair_counts.keys
-            .group_by { |k| k[0] }
-            .map { |key, values| [key, values.map { |v| @pair_counts[v] }.sum] }
-          ]
-        end
-
         def difference
-          counts = count_by_element
-          sorted = counts.keys.sort_by {|c| counts[c]} - ["$"]
-          counts[sorted[-1]] - counts[sorted[0]]
+          sorted = @element_counts.keys.sort_by {|c| @element_counts[c]}
+          @element_counts[sorted[-1]] - @element_counts[sorted[0]]
         end
       end
 
