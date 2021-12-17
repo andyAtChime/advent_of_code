@@ -34,8 +34,7 @@ module NewDay
           class #{day_class_string(day, year)} < AdventOfCode::Day
             DAY = #{day}
             YEAR = #{year}
-            # modify if necessary
-            # INPUT_PARSER = lambda { |line| line }
+            INPUT_PARSER = lambda { |line| line }
 
             class << self
               def run_a
