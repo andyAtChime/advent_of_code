@@ -13,7 +13,13 @@ module RunDay
         return
       end
       klass = day_class(day, year)
-      [klass.run_a, klass.run_b]
+      [time { klass.run_a }, time { klass.run_b}]
+    end
+
+    def time(&block)
+      t = Time.now
+      output = block.call
+      "#{output} (#{Time.now - t}s)"
     end
   end
 end
