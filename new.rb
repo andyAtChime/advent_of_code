@@ -71,13 +71,13 @@ module NewDay
           end
 
           def test_run_a
-            # input_lines([])
-            # assert_equal(run_a, 0)
+            input_lines([])
+            assert_equal(0, run_a)
           end
 
           def test_run_b
-            # input_lines([])
-            # assert_equal(run_b, 0)
+            input_lines([])
+            assert_equal(0, run_b)
           end
         end
       TEST_TEMPLATE
