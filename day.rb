@@ -31,6 +31,18 @@ module AdventOfCode
       def input_file_path
         input_filename(self::DAY, self::YEAR)
       end
+
+      def chunked_input(separator = "")
+        current = []
+        parsed_input.each_with_object([]) do |line, all|
+          if line == separator
+            all << current
+            current = []
+          else
+            current << line
+          end
+        end
+      end
     end
   end
 end
