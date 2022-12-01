@@ -5,19 +5,11 @@ module AdventOfCode
     class AdventOfCode::Year2022::Day01 < AdventOfCode::Day
       DAY = 1
       YEAR = 2022
-      INPUT_PARSER = lambda { |line| line }
+      INPUT_PARSER = lambda { |line| line.to_i }
 
       class << self
         def sums
-          current = 0
-          parsed_input.each_with_object([]) do |line, sums|
-            if line.length > 0
-              current += line.to_i
-            else
-              sums << current
-              current = 0
-            end
-          end
+          chunked_input(0).map(&:sum)
         end
 
         def run_a
