@@ -9,7 +9,7 @@ module AdventOfCode
 
       class << self
         def sums
-          chunked_input(0).map(&:sum)
+          separated_input(0).map(&:sum)
         end
 
         def run_a
