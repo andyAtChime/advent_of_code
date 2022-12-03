@@ -32,10 +32,15 @@ module AdventOfCode
         input_filename(self::DAY, self::YEAR)
       end
 
-      def chunked_input(separator = "")
+      def chunked_input(lines)
+        parsed_input.each_slice(lines).to_a
+      end
+
+      def separated_input(separator = "", include_in_previous: false)
         current = []
         parsed_input.each_with_object([]) do |line, all|
           if line == separator
+            current << line if include_in_previous
             all << current
             current = []
           else
