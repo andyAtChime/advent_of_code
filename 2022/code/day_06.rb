@@ -9,7 +9,7 @@ module AdventOfCode
       INPUT_PARSER = lambda { |line| line.scan(/./) }
 
       class << self
-        def build_regex(size)
+        def regex_solution(size)
           r = "(\\w)"
           (1..(size - 1)).each do |i|
             (1..i).each do |j|
@@ -18,15 +18,15 @@ module AdventOfCode
             r += "(\\w)"
           end
 
-          Regexp.new r
+          ((Regexp.new r) =~ input_blob) + size
         end
 
         def run_a
-          (build_regex(4) =~ input_blob) + 4
+          regex_solution(4)
         end
 
         def run_b
-          (build_regex(14) =~ input_blob) + 14
+          regex_solution(14)
         end
       end
     end
