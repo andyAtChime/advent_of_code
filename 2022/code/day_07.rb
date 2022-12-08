@@ -8,38 +8,21 @@ module AdventOfCode
       INPUT_PARSER = lambda { |line| line }
 
       class << self
-        def get_size(dirs, dir)
-          dirs[dir][:file_size] + dirs[dir][:subs].map { |s| get_size(dirs, s) }.sum
-        end
-
         def directory_sizes
-          directories = {"/" => {file_size: 0, subs: []}}
-          current_dir = ["/"]
-          parsed_input.each do |line|
-            if /\$ cd ?(?<dir>.*)/ =~ line
+          current_dir = []
+          joiner = lambda { |n=current_dir.size| current_dir[(0..n)].join(".") }
+
+          parsed_input.each_with_object(Hash.new(0)) do |line, dir_sizes|
+            if /\$ cd (?<dir>.*)/ =~ line
               if dir == ".."
-                current_dir.pop if current_dir.length > 1
-              elsif dir == "/"
-                current_dir = ["/"]
+                current_dir.pop
               else
                 current_dir << dir
               end
-            elsif /\$ ls/ =~ line
-            else
-              dir = current_dir.join("/")
-              if /dir (?<subdir>.*)/ =~ line
-                subdir = dir + "/" + subdir
-                directories[subdir] = {file_size: 0, subs: []} unless directories[subdir]
-                directories[dir][:subs] << subdir
-              elsif /(?<size>\d+) (?<filename>.*)/ =~ line
-                directories[dir][:file_size] += size.to_i
+            elsif /(?<size>\d+) (?<file_name>.*)/ =~ line
+              (0...current_dir.size).each do |i|
+                dir_sizes[joiner.call(i)] += size.to_i
               end
-            end
-          end
-
-          {}.tap do |dir_sizes|
-            directories.each do |dir, v| 
-              dir_sizes[dir] = get_size(directories, dir)
             end
           end
         end
