@@ -10,6 +10,7 @@ class BaseTest < Test::Unit::TestCase
 
   def input_blob(input)
     @input_blob = input
+    @input_lines = input.split("\n")
   end
 
   def mock_day
