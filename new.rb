@@ -70,12 +70,20 @@ module NewDay
           end
 
           def test_run_a
-            input_lines([])
+            input_blob(
+              <<~INPUT
+                
+              INPUT
+            )
             assert_equal(0, run_a)
           end
 
           def test_run_b
-            input_lines([])
+            input_blob(
+              <<~INPUT
+                
+              INPUT
+            )
             assert_equal(0, run_b)
           end
         end
