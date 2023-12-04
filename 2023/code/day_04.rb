@@ -12,13 +12,8 @@ module AdventOfCode
 
         class << self
           def from_line(line)
-            card_no, contents = line.split(": ")
-            card_no = card_no.scan(/\d+/).map(&:to_i).first
-
-            front, back = contents.split(" | ")
-            front = front.scan(/\d+/).map(&:to_i)
-            back = back.scan(/\d+/).map(&:to_i)
-
+            card_no, front, back = line.split(/: | \| /).map { |s| s.scan(/\d+/).map(&:to_i) }
+            card_no = card_no.first
             new(card_no, front, back)
           end
         end
@@ -30,7 +25,7 @@ module AdventOfCode
         end
 
         def match_count
-          (my_numbers & winning_numbers).length
+          @match_count ||= (my_numbers & winning_numbers).length
         end
 
         def score
