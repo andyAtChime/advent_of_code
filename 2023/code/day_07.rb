@@ -9,17 +9,16 @@ module AdventOfCode
       CARDS = {
         v1: ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"],
         v2: ["J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"],
-      }
-      HANDS = [:high_card, :pair, :two_pair, :three, :full, :four, :five]
+      }.freeze
+      HANDS = [:high_card, :pair, :two_pair, :three, :full, :four, :five].freeze
 
       class Hand
         attr_reader :cards, :bid, :version
 
         class << self
           def from_line(line, version)
-            c, bid = line.split(" ")
-            cards = c.split("")
-            Hand.new(cards, bid.to_i, version)
+            cards, bid = line.split(" ")
+            Hand.new(cards.split(""), bid.to_i, version)
           end
         end
 
@@ -29,12 +28,15 @@ module AdventOfCode
           @version = version
         end
 
+        def card_index(i)
+          CARDS[version].index(cards[i])
+        end
+
         def <=>(other)
-          puts "cards: #{cards}, other.cards: #{other.cards}" unless kind
           if HANDS.index(kind) == HANDS.index(other.kind)
             0.upto(4) do |i|
-              next if CARDS[version].index(cards[i]) == CARDS[version].index(other.cards[i])
-              return CARDS[version].index(cards[i]) <=> CARDS[version].index(other.cards[i])
+              next if card_index(i) == other.card_index(i)
+              return card_index(i) <=> other.card_index(i)
             end
           else
             return HANDS.index(kind) <=> HANDS.index(other.kind)
@@ -42,46 +44,40 @@ module AdventOfCode
         end
 
         def kind
-          version == :v1 ? kind_v1 : kind_v2
-        end
-
-        def kind_v1
-          # group cards by count of each card
-          counts = @cards.group_by { |c| @cards.count(c) }
           if counts.keys.include?(3) && counts.keys.include?(2)
             return :full
           elsif counts[2]&.uniq&.length == 2
-            return :two_pair
+            return wilds == 1 ? :full : :two_pair
           else
-            [:high_card, :pair, :three, :four, :five][(counts.keys.max || 0) - 1]
+            [:high_card, :pair, :three, :four, :five][(counts.keys.max || 0) + wilds - 1]
           end
         end
 
-        def kind_v2
-          counts = (@cards - ["J"]).group_by { |c| @cards.count(c) }
-          js = @cards.count("J")
+        def counts
+          @counts ||= {
+            v1: @cards,
+            v2: @cards.reject { |c| c == "J" }
+          }[version].group_by { |c| @cards.count(c) }
+        end
 
-          if counts.keys.include?(3) && counts.keys.include?(2)
-            return :full
-          elsif counts[2]&.uniq&.length == 2
-            return js == 1 ? :full : :two_pair
-          else
-            [:high_card, :pair, :three, :four, :five][(counts.keys.max || 0) + js - 1]
-          end
+        def wilds
+          @wilds ||= {v1: 0, v2: @cards.count("J")}[version]
         end
       end
 
       class << self
-        def run_a
-          input_lines.map { |l| Hand.from_line(l, :v1) }.sort.map.with_index do |hand, i|
+        def run(version)
+          input_lines.map { |l| Hand.from_line(l, version) }.sort.map.with_index do |hand, i|
             hand.bid * (i + 1)
           end.sum
         end
 
+        def run_a
+          run(:v1)
+        end
+
         def run_b
-          input_lines.map { |l| Hand.from_line(l, :v2) }.sort.map.with_index do |hand, i|
-            hand.bid * (i + 1)
-          end.sum
+          run(:v2)
         end
       end
     end

@@ -20,7 +20,7 @@ class Test20237 < BaseTest
         QQQJA 483        
       INPUT
     )
-    assert_equal(0, run_a)
+    assert_equal(6440, run_a)
   end
 
   def test_run_b
@@ -33,6 +33,6 @@ class Test20237 < BaseTest
         QQQJA 483        
       INPUT
     )
-    assert_equal(0, run_b)
+    assert_equal(5905, run_b)
   end
 end
