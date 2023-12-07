@@ -7,10 +7,10 @@ module AdventOfCode
       YEAR = 2023
       INPUT_PARSER = lambda { |line| line }
       CARDS = {
-        v1: ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"].reverse,
-        v2: ["A", "K", "Q", "T", "9", "8", "7", "6", "5", "4", "3", "2", "J"].reverse,
+        v1: ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"],
+        v2: ["J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A"],
       }
-      HANDS = [:five, :four, :full, :three, :two_pair, :pair, :high_card].reverse
+      HANDS = [:high_card, :pair, :two_pair, :three, :full, :four, :five]
 
       class Hand
         attr_reader :cards, :bid, :version
@@ -48,20 +48,12 @@ module AdventOfCode
         def kind_v1
           # group cards by count of each card
           counts = @cards.group_by { |c| @cards.count(c) }
-          if counts.keys.include?(5)
-            return :five
-          elsif counts.keys.include?(4)
-            return :four
-          elsif counts.keys.include?(3) && counts.keys.include?(2)
+          if counts.keys.include?(3) && counts.keys.include?(2)
             return :full
-          elsif counts.keys.include?(3)
-            return :three
           elsif counts[2]&.uniq&.length == 2
             return :two_pair
-          elsif counts.keys.count(2) == 1
-            return :pair
           else
-            return :high_card
+            [:high_card, :pair, :three, :four, :five][(counts.keys.max || 0) - 1]
           end
         end
 
@@ -69,49 +61,12 @@ module AdventOfCode
           counts = (@cards - ["J"]).group_by { |c| @cards.count(c) }
           js = @cards.count("J")
 
-          if counts.keys.include?(5)
-            return :five
-          elsif counts.keys.include?(4)
-            return js == 1 ? :five : :four
-          elsif counts.keys.include?(3) && counts.keys.include?(2)
+          if counts.keys.include?(3) && counts.keys.include?(2)
             return :full
-          elsif counts.keys.include?(3)
-            case js
-            when 0
-              return :three
-            when 1
-              return :four
-            when 2
-              return :five
-            end
           elsif counts[2]&.uniq&.length == 2
             return js == 1 ? :full : :two_pair
-          elsif counts.keys.count(2) == 1
-            case js
-            when 0
-              return :pair
-            when 1
-              return :three
-            when 2
-              return :four
-            when 3
-              return :five
-            end
           else
-            case js
-            when 0
-              return :high_card
-            when 1
-              return :pair
-            when 2
-              return :three
-            when 3
-              return :four
-            when 4
-              return :five
-            when 5
-              return :five
-            end
+            [:high_card, :pair, :three, :four, :five][(counts.keys.max || 0) + js - 1]
           end
         end
       end
