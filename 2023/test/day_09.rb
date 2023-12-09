@@ -18,7 +18,7 @@ class Test20239 < BaseTest
 10 13 16 21 30 45        
       INPUT
     )
-    assert_equal(0, run_a)
+    assert_equal(114, run_a)
   end
 
   def test_run_b
@@ -29,6 +29,6 @@ class Test20239 < BaseTest
 10 13 16 21 30 45        
       INPUT
     )
-    assert_equal(0, run_b)
+    assert_equal(2, run_b)
   end
 end

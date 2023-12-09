@@ -9,38 +9,22 @@ module AdventOfCode
 
       class << self
         def get_diffs(ints)
-          zipped = ints[0...-1].zip(ints[1..-1])
-          zipped.map do |a, b|
-            b - a
-          end
+          ints[0...-1].zip(ints[1..-1]).map { |a, b| b - a }
+        end
+
+        def reduce_diffs(ints, &block)
+          [ints].tap do |diffs|
+            diffs << get_diffs(diffs[-1]) until diffs[-1].all?(&:zero?)
+          end.map(&block)
         end
 
         def run_a
-          parsed_input.map do |line|
-            ints = line
-            i = line[-1]
-
-            until ints.all?(&:zero?)
-              ints = get_diffs(ints)
-              i += ints[-1]
-            end
-            i
-          end.sum
+          parsed_input.map { |ints| reduce_diffs(ints, &:last) }.flatten.sum
         end
 
         def run_b
-          parsed_input.map do |line|
-            diff_lists = [line]
-            until diff_lists[-1].all?(&:zero?)
-              diff_lists << get_diffs(diff_lists[-1])
-            end
-            i = 0
-            diff_lists[0].push(0)
-            new = 0
-            diff_lists.reverse[1..].each do |diff_list|
-              new = diff_list[0] - new
-            end
-            new
+          parsed_input.map do |ints|
+            reduce_diffs(ints, &:first).reverse.reduce(0) { |a, b| b - a }
           end.sum
         end
       end
