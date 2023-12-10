@@ -18,14 +18,16 @@ module AdventOfCode
           end.map(&block)
         end
 
+        def ab(&block)
+          parsed_input.map(&block).map { |ints| reduce_diffs(ints, &:last) }.flatten.sum
+        end
+
         def run_a
-          parsed_input.map { |ints| reduce_diffs(ints, &:last) }.flatten.sum
+          ab(&:itself)
         end
 
         def run_b
-          parsed_input.map do |ints|
-            reduce_diffs(ints, &:first).reverse.reduce(0) { |a, b| b - a }
-          end.sum
+          ab(&:reverse)
         end
       end
     end
