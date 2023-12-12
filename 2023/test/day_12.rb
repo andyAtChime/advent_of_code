@@ -1,0 +1,40 @@
+require_relative "../code/day_12.rb"
+require_relative "../../base_test.rb"
+
+class Test202312 < BaseTest
+  def day_number
+    12
+  end
+
+  def year_number
+    2023
+  end
+
+  def test_run_a
+    input_blob(
+      <<~INPUT
+???.### 1,1,3
+.??..??...?##. 1,1,3
+?#?#?#?#?#?#?#? 1,3,1,6
+????.#...#... 4,1,1
+????.######..#####. 1,6,5
+?###???????? 3,2,1
+      INPUT
+    )
+    assert_equal(0, run_a)
+  end
+
+  def test_run_b
+    input_blob(
+      <<~INPUT
+???.### 1,1,3
+.??..??...?##. 1,1,3
+?#?#?#?#?#?#?#? 1,3,1,6
+????.#...#... 4,1,1
+????.######..#####. 1,6,5
+?###???????? 3,2,1
+      INPUT
+    )
+    assert_equal(0, run_b)
+  end
+end
