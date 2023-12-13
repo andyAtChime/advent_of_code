@@ -20,26 +20,18 @@ module AdventOfCode
           end.compact.sum
         end
 
-        def ham_self(a, i)
-          a[i...(i * 2)].zip(a[0...i].reverse).map do |x, y|
-            (x ^ y).to_s(2).count('1')
-          end.sum
-        end
-
-        def chonk_line(chonk, off_by = 0)
+        def combo_line(chonk, off_by = 0)
           a = chonk.map { |line| line_to_int(line) }
-          1.upto(a.size / 2).map do |i|
-            if ham_self(a, i) == off_by
-              i
-            elsif ham_self(a.reverse, i) == off_by
-              a.size - i
-            end
-          end.compact.max || 0
+          (0...a.size).to_a.combination(2).with_object({}) do |(x, y), acc|
+            center_line = (x + y + 1) / 2.0
+            acc[center_line] ||= []
+            acc[center_line] << (a[x] ^ a[y]).to_s(2).count('1')
+          end.sum { |k, v| v.sum == off_by && k.to_i == k ? k.to_i : 0 }
         end
 
         def solve(off_by)
           parsed_input.map do |chonk|
-            chonk_line(chonk, off_by) * 100 + chonk_line(chonk.transpose, off_by)
+            combo_line(chonk, off_by) * 100 + combo_line(chonk.transpose, off_by)
           end.flatten.sum
         end
 
