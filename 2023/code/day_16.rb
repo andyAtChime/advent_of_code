@@ -31,12 +31,17 @@ module AdventOfCode
           @x = x
           @y = y
           @symbol = symbol
-          @accessed = {u: false, d: false, l: false, r: false}
+          @accessed = {u: nil, d: nil, l: nil, r: nil}
           @neighbors = {u: nil, d: nil, l: nil, r: nil}
+          @segment = nil
         end
 
         def light
           accessed.values.any? ? "#" : "."
+        end
+
+        def seg_light(segments)
+          accessed.values.any? { |v| segments.include?(v) } ? "#" : symbol
         end
         
         def out_directions
@@ -65,6 +70,38 @@ module AdventOfCode
       class BSlashNode < LightNode
         def out_directions
           { u: [:r], d: [:l], l: [:d], r: [:u] }
+        end
+      end
+
+      class LightNodeSegment
+        attr_accessor :start, :nodes, :children, :directions, :index
+        def initialize(start, from, index)
+          @nodes = [start]
+          @directions = [from]
+          @children = {}
+          @index = index
+        end
+
+        def length
+          nodes.size
+        end
+
+        def child_nodes
+          next_segments = [self]
+          seen_segments = {self => 0}
+          until next_segments.empty? do
+            seg = next_segments.shift
+            seg.children.each do |child, index|
+              existing_index = seen_segments[child]
+              if !existing_index
+                next_segments << child
+                seen_segments[child] = index
+              else
+                seen_segments[child] = index if index < existing_index
+              end
+            end
+          end
+          seen_segments.map { |k, v| k.nodes[v..] }.flatten.uniq
         end
       end
 
@@ -97,60 +134,76 @@ module AdventOfCode
           @nodes = nodes
         end
 
-        def bfs_traverse(x_start, y_start, from)
-          start_node = @nodes[y_start][x_start]
-          next_layer = [[start_node, from]]
-          until next_layer.empty? do
-            layer = next_layer
-            next_layer = []
+        def get_segments(node_hash)
+          traversal_segments = []
+          segment_count = 0
+          node_hash.each do |node, from|
+            traversal_segments << LightNodeSegment.new(node, from, segment_count += 1)
+          end
+          
+          edge_segments = traversal_segments
 
-            until layer.empty? do
-              node, from = layer.shift
-              next if node.accessed[from]
-              node.accessed[from] = true
+          i = 0
+          while traversal_segments.any? do
+            segments = traversal_segments
+            traversal_segments = []
 
+            segments.each do |segment|
+              node = segment.nodes.last
+              from = segment.directions.last
+              node.accessed[from] = segment
+
+              out_directions = node.out_directions[from]
               node.out_directions[from].each do |out_direction|
+                next_in = INVERSE[out_direction]
                 neighbor = node.neighbors[out_direction]
-                next_layer << [neighbor, INVERSE[out_direction]] if neighbor
+                if neighbor
+                  existing_segment = neighbor.accessed[next_in]
+                  if existing_segment
+                    segment.children[existing_segment] = existing_segment.nodes.index(neighbor)
+                  elsif next_in == from
+                    segment.nodes << neighbor
+                    segment.directions << next_in
+                    traversal_segments << segment
+                  else
+                    s = LightNodeSegment.new(neighbor, next_in, segment_count += 1)
+                    segment.children[s] = 0
+                    traversal_segments << s
+                  end
+                end
               end
             end
-            # pretty_print
           end
-          return nodes.flatten.count { |n| n.accessed.values.any? }
-        end
-
-        def pretty_print
-          puts @nodes.map { |line| line.map(&:light).join("") }.join("\n") + "\n\n"
-        end
-
-        def reset
-          nodes.each do |line|
-            line.each do |node|
-              node.accessed = {u: false, d: false, l: false, r: false}
-            end
-          end
+          edge_segments
         end
       end
 
       class << self
+
         def run_a
-          LightNodeGraph.from_input(parsed_input).bfs_traverse(0, 0, :l)
+          graph = LightNodeGraph.from_input(parsed_input)
+          segment = graph.get_segments(graph.nodes.first.first => :l).first
+          segment.child_nodes.size
         end
 
         def run_b
           graph = LightNodeGraph.from_input(parsed_input)
           nodes = graph.nodes.dup
+          mass_traversal_starts = {}
           graph.nodes.each_with_index.map do |line, y|
             line.each_with_index.map do |node, x|
-              a = x == 0 ? graph.bfs_traverse(x, y, :l) : 0
-              b = x == line.size - 1 ? graph.bfs_traverse(x, y, :r) : 0
-              graph.reset if a > 0 || b > 0
-              c = y == 0 ? graph.bfs_traverse(x, y, :u) : 0
-              d = y == graph.nodes.size - 1 ? graph.bfs_traverse(x, y, :d) : 0
-              graph.reset if c > 0 || d > 0
-              [a, b, c, d]
+              mass_traversal_starts[node] = :l if x == 0
+              mass_traversal_starts[node] = :r if x == line.size - 1
+              mass_traversal_starts[node] = :u if y == 0
+              mass_traversal_starts[node] = :d if y == graph.nodes.size - 1
             end
-          end.flatten.max
+          end
+
+          edge_segments = graph.get_segments(mass_traversal_starts)
+
+          edge_segments.map do |seg|
+            seg.child_nodes.size
+          end.max
         end
       end
     end
